@@ -12,7 +12,7 @@ env = make_vec_env(lambda: BatteryEnv(data), n_envs=1)
 
 # Train the agent and save the trained model to a file
 model = PPO("MlpPolicy", env=env, verbose=1)
-model.learn(total_timesteps=10000)
+model.learn(total_timesteps=10000, progress_bar=True)
 model.save("battery_trading_model")
 
 # Load the saved model and run the agent
