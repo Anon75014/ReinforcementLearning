@@ -1,0 +1,66 @@
+# Create a vectorized environment
+env = make_vec_env(lambda: env, n_envs=1)
+# Instantiate an agent
+model = PPO('MlpPolicy', env, verbose=1)
+# Define a callback to save the best model
+callback = SaveOnBestTrainingRewardCallback(check_freq=1000, log_dir='./logs')
+# Train the agent for N time steps
+time_steps = 14336
+model.learn(total_timesteps=time_steps, callback=callback)
+# Evaluate the agent
+mean_reward2, _ = evaluate_policy(model, env, n_eval_episodes=10)
+print('Mean reward:', mean_reward2)
+# Save the trained agent
+model.save('trained_PPO_agent_24_observations')
+
+# Plot the results
+results_plotter.plot_results(["C:/Users/33631/PycharmProjects/ReinforcementLearning/logs"], 10e6,results_plotter.X_EPISODES, "BatteryEnv")
+plt.show()
+
+
+
+
+
+
+
+# Create a vectorized environment
+env = make_vec_env(lambda: env, n_envs=1)
+# Get the observation space and action space sizes
+obs_space = env.observation_space.shape[0]
+act_space = 26
+
+# Train the agent for N time steps
+time_steps = 14336
+episode_rewards = []
+total_reward = 0
+obs = env.reset()
+for i in range(time_steps):
+    # Take an action in the environment
+    action, _states = model.predict(obs)
+    obs, reward, done, info = env.step(action)
+    total_reward += reward
+
+    # If the episode has ended, save the total reward and reset it
+    if done:
+        episode_rewards.append(total_reward)
+        total_reward = 0
+        obs = env.reset()
+
+# Plot the reward at the end of each episode
+plt.plot(episode_rewards)
+plt.xlabel('Episode')
+plt.ylabel('Total Reward')
+plt.show()
+
+
+
+
+# Load the prices
+prices = np.loadtxt('France_price_2022_F.csv', delimiter=',', usecols=1, skiprows=0, max_rows=24) #max:8760
+
+# Create an instance of the BatteryEnv class
+env = BatteryEnv(prices)
+
+# Save the instance to a file
+with open('battery_env.pkl', 'wb') as f:
+    pickle.dump(env, f)
